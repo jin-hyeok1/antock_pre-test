@@ -1,0 +1,29 @@
+spring:
+  application:
+    name: pre-test
+
+  h2:
+    console:
+      enabled: true
+      path: /h2-console
+  datasource:
+    username: user
+    password: user
+    url: jdbc:h2:mem:pretest
+    driver-class-name: org.h2.Driver
+  jpa:
+    hibernate:
+      ddl-auto: create
+
+api:
+  sale:
+    csv:
+      uri: https://www.ftc.go.kr/www/downloadBizComm.do?atchFileUrl=dataopen&atchFileNm=
+    detail:
+      base-url: http://apis.data.go.kr/1130000/MllBsDtl_2Service
+      uri: /getMllBsInfoDetail_2
+      key: qv1kyws9BkH0nKIjJRiLZgLGfbER0sA388f3F7byLVvWKw+qzYrNwSWzsCh+I8KwgYirwTmfgm4R0bxsK2HyyA==
+    address:
+      base-url: https://business.juso.go.kr/addrlink
+      uri: /addrLinkApi.do
+      key: devU01TX0FVVEgyMDI1MDMyNTE1MTgxMTExNTU3NzE=
