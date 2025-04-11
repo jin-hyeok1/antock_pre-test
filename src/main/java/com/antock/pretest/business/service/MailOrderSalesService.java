@@ -4,9 +4,9 @@ import com.antock.pretest.business.api.OpenApi;
 import com.antock.pretest.business.api.response.AddressResponse;
 import com.antock.pretest.business.api.response.SalesDetailResponse;
 import com.antock.pretest.business.dto.CsvData;
-import com.antock.pretest.business.repository.MailOrderSalesRepository;
 import com.antock.pretest.business.repository.entity.MailOrderSales;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.r2dbc.core.R2dbcEntityTemplate;
 import org.springframework.stereotype.Service;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
@@ -20,15 +20,15 @@ import java.util.Optional;
 public class MailOrderSalesService {
 
     private final OpenApi openApi;
-    private final MailOrderSalesRepository mailOrderSalesRepository;
+    private final R2dbcEntityTemplate r2dbcEntityTemplate;
 
-    public void saveDataFromOpenApi(String city, String district) {
+    public Mono<Void> saveDataFromOpenApi(String city, String district) {
         List<CsvData> mailOrderData = openApi.getMailOrderDataFromOpenApi(city, district);
-        Flux.fromIterable(mailOrderData)
+        return Flux.fromIterable(mailOrderData)
                 .filter(row -> "법인".equals(row.getCorporationFlag()))
                 .flatMap(this::processRowAsync)
                 .flatMap(this::saveToRepository)
-                .subscribe();
+                .then();
     }
 
     private Mono<MailOrderSales> processRowAsync(CsvData row) {
@@ -56,7 +56,6 @@ public class MailOrderSalesService {
     }
 
     private Mono<MailOrderSales> saveToRepository(MailOrderSales mailOrderSales) {
-        return Mono.fromCallable(() -> mailOrderSalesRepository.save(mailOrderSales))
-                .subscribeOn(Schedulers.boundedElastic());
+        return r2dbcEntityTemplate.insert(mailOrderSales);
     }
 }

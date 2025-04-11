@@ -1,13 +1,13 @@
 package com.antock.pretest.business.repository.entity;
 
-import jakarta.persistence.Entity;
-import jakarta.persistence.Id;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
+import org.springframework.data.annotation.Id;
+import org.springframework.data.relational.core.mapping.Table;
 
-@Entity
+@Table("MAIL_ORDER_SALES")
 @Builder
 @AllArgsConstructor
 @NoArgsConstructor

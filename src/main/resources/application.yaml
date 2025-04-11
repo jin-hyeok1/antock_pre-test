@@ -1,19 +1,23 @@
 spring:
   application:
     name: pre-test
-
-  h2:
-    console:
-      enabled: true
-      path: /h2-console
-  datasource:
+  r2dbc:
+    url: r2dbc:h2:file:///./data/testdb;DB_CLOSE_DELAY=-1;DB_CLOSE_ON_EXIT=FALSE
     username: user
     password: user
-    url: jdbc:h2:mem:pretest
+  datasource:
+    url: jdbc:h2:file:./data/testdb
+    username: user
+    password: user
     driver-class-name: org.h2.Driver
-  jpa:
-    hibernate:
-      ddl-auto: create
+  sql:
+    init:
+      mode: always
+      schema-locations: classpath:sql/init.sql
+
+h2:
+  console:
+    port: 8090
 
 api:
   sale:

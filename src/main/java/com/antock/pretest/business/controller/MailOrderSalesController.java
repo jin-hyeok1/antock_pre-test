@@ -8,6 +8,7 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
+import reactor.core.publisher.Mono;
 
 @RestController
 @RequestMapping("/mail-order-sales")
@@ -17,14 +18,14 @@ public class MailOrderSalesController {
     private final MailOrderSalesService mailOrderSalesService;
 
     @PostMapping
-    public ResponseEntity<?> saveDataFromOpenApi(
+    public Mono<ResponseEntity<Void>> saveDataFromOpenApi(
             @RequestParam String city,
             @RequestParam String district
     ) {
         if (Strings.isBlank(city) || Strings.isBlank(district)) {
-            return ResponseEntity.badRequest().build();
+            return Mono.just(ResponseEntity.badRequest().build());
         }
-        mailOrderSalesService.saveDataFromOpenApi(city, district);
-        return ResponseEntity.ok().build();
+        return mailOrderSalesService.saveDataFromOpenApi(city, district)
+                .then(Mono.just(ResponseEntity.ok().build()));
     }
 }

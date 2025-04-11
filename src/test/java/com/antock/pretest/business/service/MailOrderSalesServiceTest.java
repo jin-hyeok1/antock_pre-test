@@ -5,7 +5,6 @@ import com.antock.pretest.business.api.response.AddressResponse;
 import com.antock.pretest.business.api.response.SalesDetailResponse;
 import com.antock.pretest.business.dto.CsvData;
 import com.antock.pretest.business.repository.MailOrderSalesRepository;
-import com.antock.pretest.business.repository.entity.MailOrderSales;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -16,12 +15,11 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import reactor.core.publisher.Mono;
+import reactor.test.StepVerifier;
 
 import java.util.List;
-import java.util.concurrent.TimeUnit;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.awaitility.Awaitility.await;
 
 @SpringBootTest
 @ExtendWith(MockitoExtension.class)
@@ -82,13 +80,12 @@ class MailOrderSalesServiceTest {
                 .thenReturn(Mono.just(addressResponse));
 
         //when
-        mailOrderSalesService.saveDataFromOpenApi("서울특별시", "양천구");
+        mailOrderSalesService.saveDataFromOpenApi("서울특별시", "양천구").block();
 
         //then
-        await().atMost(5, TimeUnit.SECONDS).untilAsserted(() -> {
-            List<MailOrderSales> result = mailOrderSalesRepository.findAll();
-            assertThat(result).hasSize(2);
-        });
+        StepVerifier.create(mailOrderSalesRepository.findAll())
+                .expectNextCount(2)
+                .verifyComplete();
     }
 
     @Test
@@ -119,16 +116,15 @@ class MailOrderSalesServiceTest {
                 .thenReturn(Mono.just(new AddressResponse()));
 
         //when
-        mailOrderSalesService.saveDataFromOpenApi("제추특별자치도", "서귀포시");
+        mailOrderSalesService.saveDataFromOpenApi("제추특별자치도", "서귀포시").block();
 
         //then
-        await().atMost(5, TimeUnit.SECONDS).untilAsserted(() -> {
-            List<MailOrderSales> all = mailOrderSalesRepository.findAll();
-            assertThat(all).allSatisfy(mailOrderSale -> {
-                assertThat(mailOrderSale.getCorporationNumber()).isEqualTo("");
-                assertThat(mailOrderSale.getDistrictCode()).isEqualTo("");
-            });
-        });
+        StepVerifier.create(mailOrderSalesRepository.findAll().collectList())
+                .assertNext(all -> assertThat(all).allSatisfy(mailOrderSale -> {
+                    assertThat(mailOrderSale.getCorporationNumber()).isEqualTo("");
+                    assertThat(mailOrderSale.getDistrictCode()).isEqualTo("");
+                }))
+                .verifyComplete();
     }
 
 }
